@@ -34,12 +34,12 @@ export class EpubView extends ItemView {
     // This method is called by Obsidian to set the view's state.
     async setState(state: any, result: ViewStateResult): Promise<void> {
         this.companionFile = state.companionFile as TFile;
-        console.log(`Setting state for EpubView with companion file: ${this.companionFile}`);
+        console.debug(`Setting state for EpubView with companion file: ${this.companionFile}`);
 
         const fileCache = this.app.metadataCache.getFileCache(this.companionFile);
 		const epubPath = fileCache?.frontmatter?.[state.settings.epubLinkPropertyName];
-		console.log(`Opening EPUB view for companion file: ${this.companionFile.path}`);
-		console.log(`EPUB path from frontmatter: ${epubPath}`);
+		console.debug(`Opening EPUB view for companion file: ${this.companionFile.path}`);
+		console.debug(`EPUB path from frontmatter: ${epubPath}`);
 
         this.epubFile = this.resolveEpubLink(epubPath, this.companionFile);
         await this.draw();
@@ -56,6 +56,7 @@ export class EpubView extends ItemView {
             if (!this.epubFile || !this.epubFile.path) {
                 throw new Error("EPUB file not resolved or path is undefined.");
             }
+            
             const arrayBuffer = await this.app.vault.adapter.readBinary(this.epubFile.path);
             this.book = ePub(arrayBuffer);
 
@@ -74,7 +75,7 @@ export class EpubView extends ItemView {
             const savedCfi = progressCache?.frontmatter?.[this.plugin.settings.progressPropertyName];
 
             if (savedCfi) {
-                console.log(`Found saved progress: ${savedCfi}. Attempting to display.`);
+                console.debug(`Found saved progress: ${savedCfi}. Attempting to display.`);
                 try {
                     // Tell the rendition to go to the saved CFI
                     await this.rendition.display(savedCfi);
@@ -96,6 +97,9 @@ export class EpubView extends ItemView {
                 }
             });
 
+            // Add keyboard navigation with proper event handling
+            this.setupKeyboardNavigation(epubContainer);
+
         } catch (error) {
             console.error("Error in draw() method:", error);
         }
@@ -104,6 +108,21 @@ export class EpubView extends ItemView {
     addNavigationButtons() {
         this.addAction('chevron-left', 'Previous Page', () => this.rendition?.prev());
         this.addAction('chevron-right', 'Next Page', () => this.rendition?.next());
+    }
+
+    setupKeyboardNavigation(container: HTMLElement) {
+        // Make container focusable and focused
+        container.tabIndex = 0;
+        container.focus();
+        
+        // Add keydown listener to container (not passive)
+        container.addEventListener('keydown', this.handleKeyPress.bind(this), { passive: false });
+        
+        // Ensure container keeps focus
+        container.addEventListener('blur', () => {
+            // Re-focus after a short delay to prevent losing focus
+            setTimeout(() => container.focus(), 10);
+        });
     }
 
     getState() {
@@ -117,8 +136,6 @@ export class EpubView extends ItemView {
     }  
 
     async onOpen() {
-        console.log("onOpen triggered.");
-        // Set up a MutationObserver to watch for the iframe creation
         this.showLoading();
     }
 
@@ -129,20 +146,20 @@ export class EpubView extends ItemView {
     if (rawEpubPath.startsWith('[[') && rawEpubPath.endsWith(']]')) {
         // It's a wikilink, so we need to resolve it.
         const linkText = rawEpubPath.substring(2, rawEpubPath.length - 2);
-        console.log(`Resolving wikilink: ${linkText}`);
+        console.debug(`Resolving wikilink: ${linkText}`);
 
         // Use the API to find the file the link points to.
         // The second argument, companionFile.path, is crucial as it provides context.
         epubFile = this.app.metadataCache.getFirstLinkpathDest(linkText, companionFile.path); [3, 4]
     } else {
         // It's a plain path, use the old method.
-        console.log(`Treating as plain path: ${rawEpubPath}`);
+        console.debug(`Treating as plain path: ${rawEpubPath}`);
         const abstractFile = this.app.vault.getAbstractFileByPath(normalizePath(rawEpubPath));
         if (abstractFile instanceof TFile) {
             epubFile = abstractFile;
         }
     }
-    console.log(`Resolved EPUB file: ${epubFile ? epubFile.path : 'not found'}`);
+    console.debug(`Resolved EPUB file: ${epubFile ? epubFile.path : 'not found'}`);
     return epubFile;
 
     }
@@ -150,6 +167,31 @@ export class EpubView extends ItemView {
     async onClose() {
         if (this.book) {
             this.book.destroy();
+        }
+    }
+
+    
+    handleKeyPress(event: KeyboardEvent) {
+        // If there's no book or rendition, do nothing
+        if (!this.book || !this.rendition) return;
+
+        const isRtl = this.book.package.metadata.direction === 'rtl';
+        let nextPage = isRtl ? () => this.rendition.prev() : () => this.rendition.next();
+        let prevPage = isRtl ? () => this.rendition.next() : () => this.rendition.prev();
+
+        switch (event.key) {
+            case 'ArrowLeft':
+                prevPage();
+                event.preventDefault();
+                event.stopPropagation();
+                console.debug("Left arrow pressed, going to previous page.");
+                break;
+            case 'ArrowRight':
+                nextPage();
+                event.preventDefault();
+                event.stopPropagation();
+                console.debug("Right arrow pressed, going to next page.");
+                break;
         }
     }
 }

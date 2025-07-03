@@ -15,7 +15,7 @@ export default class EpubReaderPlugin extends Plugin {
 //... (keep the `export default class MyEpubPlugin extends Plugin {...` part)
 
     async onload() {
-        console.log("Loading EPUB Reader Plugin..."); // To confirm the plugin starts loading
+        console.info("Loading EPUB Reader Plugin..."); // To confirm the plugin starts loading
 
         await this.loadSettings();
         this.addSettingTab(new EpubReaderSettingsTab(this.app, this));
@@ -108,8 +108,8 @@ export default class EpubReaderPlugin extends Plugin {
 
 		const fileCache = this.app.metadataCache.getFileCache(activeFile);
 		const epubPath = fileCache?.frontmatter?.[this.settings.epubLinkPropertyName];
-		console.log(`Opening EPUB view for companion file: ${companionFile.path}`);
-		console.log(`EPUB path from frontmatter: ${epubPath}`);
+		console.debug(`Opening EPUB view for companion file: ${companionFile.path}`);
+		console.debug(`EPUB path from frontmatter: ${epubPath}`);
 
 		// Get a new leaf (tab) to display our view in
 		const leaf = this.app.workspace.getLeaf(true);
@@ -135,7 +135,7 @@ export default class EpubReaderPlugin extends Plugin {
                 // Use the property name from our settings
                 const propertyName = this.settings.progressPropertyName;
                 frontmatter[propertyName] = cfi;
-                console.log(`Saving progress CFI to ${file.path}: ${cfi}`);
+                console.debug(`Saving progress CFI to ${file.path}: ${cfi}`);
             });
         } catch (error) {
             console.error("Error saving reading progress:", error);
@@ -144,6 +144,6 @@ export default class EpubReaderPlugin extends Plugin {
 
 
     onunload() {
-        console.log("Unloading EPUB Reader Plugin");
+        console.debug("Unloading EPUB Reader Plugin");
     }
 }
