@@ -69,7 +69,32 @@ export class EpubView extends ItemView {
             });
             
             await this.rendition.display();
+
+            const progressCache = this.app.metadataCache.getFileCache(this.companionFile);
+            const savedCfi = progressCache?.frontmatter?.[this.plugin.settings.progressPropertyName];
+
+            if (savedCfi) {
+                console.log(`Found saved progress: ${savedCfi}. Attempting to display.`);
+                try {
+                    // Tell the rendition to go to the saved CFI
+                    await this.rendition.display(savedCfi);
+                } catch (error) {
+                    console.error("Failed to display saved CFI:", savedCfi, error);
+                    new Notice("Could not restore last reading position.");
+                }
+            }
+            // --- END NEW ---
+
             this.addNavigationButtons();
+
+                // --- Listen for page changes to save progress ---
+            this.rendition.on('relocated', (location: any) => {
+                const cfi = location.start.cfi;
+                if (this.companionFile) {
+                    // Call the save function from our main plugin class
+                    this.plugin.saveReadingProgress(this.companionFile, cfi);
+                }
+            });
 
         } catch (error) {
             console.error("Error in draw() method:", error);

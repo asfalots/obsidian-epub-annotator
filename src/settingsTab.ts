@@ -31,5 +31,15 @@ export class EpubReaderSettingsTab extends PluginSettingTab {
                     // Save the settings
                     await this.plugin.saveSettings();
                 }));
+        new Setting(containerEl)
+            .setName('Progress Property')
+            .setDesc('The frontmatter property name for storing reading progress (CFI).')
+            .addText(text => text
+                .setPlaceholder('e.g., epub-progress')
+                .setValue(this.plugin.settings.progressPropertyName)
+                .onChange(async (value) => {
+                        this.plugin.settings.progressPropertyName = value;
+                        await this.plugin.saveSettings();
+                    }));
     }
 }

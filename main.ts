@@ -129,6 +129,20 @@ export default class EpubReaderPlugin extends Plugin {
 	}
 
 
+    async saveReadingProgress(file: TFile, cfi: string) {
+        try {
+            await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+                // Use the property name from our settings
+                const propertyName = this.settings.progressPropertyName;
+                frontmatter[propertyName] = cfi;
+                console.log(`Saving progress CFI to ${file.path}: ${cfi}`);
+            });
+        } catch (error) {
+            console.error("Error saving reading progress:", error);
+        }
+    }
+
+
     onunload() {
         console.log("Unloading EPUB Reader Plugin");
     }
