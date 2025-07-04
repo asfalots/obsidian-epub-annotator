@@ -3,7 +3,7 @@ import { EpubReaderSettings, DEFAULT_SETTINGS } from './src/settings';
 import { EpubReaderSettingsTab } from './src/settingsTab';
 import { EpubView, EPUB_VIEW_TYPE } from './src/epubView';
 import { TFile, WorkspaceLeaf } from 'obsidian';
-import { EpubAnnotation, parseAnnotationsFromMarkdown, generateSectionContent } from './src/annotations';
+import { EpubAnnotation, parseAnnotationsFromMarkdown } from './src/annotations';
 
 
 export default class EpubReaderPlugin extends Plugin {
@@ -54,25 +54,6 @@ export default class EpubReaderPlugin extends Plugin {
                 // If we are not just checking, the user has executed the command.
                 console.log(`Executing 'open-associated-epub' for: ${activeFile.path}`);
                 this.openEpubView(activeFile);
-                return true;
-            },
-        });
-
-        // Add command to reorganize annotations by color
-        this.addCommand({
-            id: 'reorganize-annotations',
-            name: 'Reorganize EPUB annotations by color',
-            checkCallback: (checking: boolean) => {
-                const activeFile = this.app.workspace.getActiveFile();
-                if (!activeFile || activeFile.extension !== 'md') {
-                    return false;
-                }
-
-                if (checking) {
-                    return true;
-                }
-
-                this.reorganizeAnnotations(activeFile);
                 return true;
             },
         });
@@ -164,43 +145,6 @@ export default class EpubReaderPlugin extends Plugin {
             });
         } catch (error) {
             console.error("Error saving reading progress:", error);
-        }
-    }
-
-    async reorganizeAnnotations(file: TFile) {
-        try {
-            const content = await this.app.vault.read(file);
-            const annotations = parseAnnotationsFromMarkdown(content);
-            
-            if (annotations.length === 0) {
-                new Notice('No annotations found in this note');
-                return;
-            }
-
-            // Remove existing annotation sections and comments
-            let cleanContent = content.replace(/<!--\s*EPUB_ANNOTATION:.*?-->/g, '');
-            
-            // Remove empty annotation sections
-            this.settings.colorMappings.forEach(mapping => {
-                const sectionRegex = new RegExp(`\n*${mapping.sectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\n*(?:- .*\n)*`, 'gm');
-                cleanContent = cleanContent.replace(sectionRegex, '');
-            });
-
-            // Add reorganized sections
-            let newContent = cleanContent.trim();
-            
-            this.settings.colorMappings.forEach(mapping => {
-                const sectionContent = generateSectionContent(annotations, mapping.color, mapping.template, file.path);
-                if (sectionContent.trim()) {
-                    newContent += `\n\n${mapping.sectionTitle}\n\n${sectionContent}`;
-                }
-            });
-
-            await this.app.vault.modify(file, newContent);
-            new Notice('Annotations reorganized by color');
-        } catch (error) {
-            console.error("Error reorganizing annotations:", error);
-            new Notice('Failed to reorganize annotations');
         }
     }
 

@@ -95,7 +95,6 @@ Use these in your templates:
 ## Commands
 
 - **Open associated EPUB** - Opens the reader for the current note
-- **Reorganize EPUB annotations by color** - Cleans up existing highlights
 
 ## Requirements
 
