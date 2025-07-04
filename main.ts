@@ -107,6 +107,11 @@ export default class EpubReaderPlugin extends Plugin {
             })
         );
 
+        // Register protocol handler for EPUB annotation links
+        this.registerObsidianProtocolHandler('epub-annotator', (params) => {
+            this.handleEpubAnnotatorUri(params);
+        });
+
         console.log("EPUB Reader Plugin loaded successfully.");
     }
 
@@ -185,7 +190,7 @@ export default class EpubReaderPlugin extends Plugin {
             let newContent = cleanContent.trim();
             
             this.settings.colorMappings.forEach(mapping => {
-                const sectionContent = generateSectionContent(annotations, mapping.color, mapping.template);
+                const sectionContent = generateSectionContent(annotations, mapping.color, mapping.template, file.path);
                 if (sectionContent.trim()) {
                     newContent += `\n\n${mapping.sectionTitle}\n\n${sectionContent}`;
                 }
@@ -197,6 +202,55 @@ export default class EpubReaderPlugin extends Plugin {
             console.error("Error reorganizing annotations:", error);
             new Notice('Failed to reorganize annotations');
         }
+    }
+
+    /**
+     * Handle custom URI for opening EPUB at specific annotation location
+     */
+    async handleEpubAnnotatorUri(params: any) {
+        const { file: filePath, cfi } = params;
+        
+        if (!filePath || !cfi) {
+            new Notice('Invalid EPUB annotation link');
+            return;
+        }
+
+        try {
+            // Find the companion file
+            const companionFile = this.app.vault.getAbstractFileByPath(decodeURIComponent(filePath));
+            if (!(companionFile instanceof TFile)) {
+                new Notice('Could not find the associated note file');
+                return;
+            }
+
+            // Open the EPUB view
+            await this.openEpubView(companionFile);
+            
+            // Wait a moment for the view to initialize, then navigate to the CFI
+            setTimeout(async () => {
+                const epubView = this.getActiveEpubView();
+                if (epubView && epubView.rendition) {
+                    try {
+                        await epubView.rendition.display(decodeURIComponent(cfi));
+                        new Notice('Navigated to annotation location');
+                    } catch (error) {
+                        console.error('Failed to navigate to CFI:', error);
+                        new Notice('Could not navigate to annotation location');
+                    }
+                }
+            }, 1000);
+        } catch (error) {
+            console.error('Error handling EPUB annotation URI:', error);
+            new Notice('Failed to open EPUB annotation');
+        }
+    }
+
+    /**
+     * Get the currently active EPUB view if any
+     */
+    private getActiveEpubView(): any {
+        const leaves = this.app.workspace.getLeavesOfType(EPUB_VIEW_TYPE);
+        return leaves.length > 0 ? leaves[0].view : null;
     }
 
     onunload() {

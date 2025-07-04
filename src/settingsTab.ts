@@ -59,14 +59,14 @@ export class EpubReaderSettingsTab extends PluginSettingTab {
             text: 'Configure which colors map to which sections in your notes.' 
         });
         containerEl.createEl('p', { 
-            text: 'Template variables: {{text}} (highlighted text), {{note}} (user note)' 
+            text: 'Template variables: {{text}} (highlighted text), {{note}} (user note), {{link}} (link to annotation location)' 
         });
         const exampleEl = containerEl.createEl('details');
         exampleEl.createEl('summary', { text: 'Template Examples' });
         const exampleList = exampleEl.createEl('ul');
-        exampleList.createEl('li').innerHTML = '<code>- {{text}} - {{note}}</code> → Standard bullet list';
-        exampleList.createEl('li').innerHTML = '<code>> {{text}}<br/>><br/>> Note: {{note}}</code> → Block quote format';
-        exampleList.createEl('li').innerHTML = '<code>**{{text}}** ({{note}})</code> → Bold text with note in parentheses';
+        exampleList.createEl('li').innerHTML = '<code>- {{text}} - {{note}} - [📖]({{link}})</code> → Bullet list with link';
+        exampleList.createEl('li').innerHTML = '<code>> {{text}}<br/>><br/>> Note: {{note}}<br/>> [Open in EPUB]({{link}})</code> → Block quote with link';
+        exampleList.createEl('li').innerHTML = '<code>**{{text}}** ({{note}}) [🔗]({{link}})</code> → Bold text with note and link';
 
         this.plugin.settings.colorMappings.forEach((mapping, index) => {
             this.createColorMappingSetting(containerEl, mapping, index);
@@ -80,7 +80,7 @@ export class EpubReaderSettingsTab extends PluginSettingTab {
                     this.plugin.settings.colorMappings.push({
                         color: '#ffffff',
                         sectionTitle: '## New Section',
-                        template: '- {{text}} - {{note}}'
+                        template: '- {{text}} - {{note}} - [📖]({{link}})'
                     });
                     this.plugin.saveSettings();
                     this.display(); // Refresh the display
@@ -115,10 +115,10 @@ export class EpubReaderSettingsTab extends PluginSettingTab {
         // Add template setting as a separate setting below
         new Setting(containerEl)
             .setName('Template')
-            .setDesc('Template for this highlight color. Use {{text}} for highlighted text and {{note}} for user notes.')
+            .setDesc('Template for this highlight color. Use {{text}} for highlighted text, {{note}} for user notes, and {{link}} for links to annotation location.')
             .addTextArea(textArea => textArea
-                .setPlaceholder('- {{text}} - {{note}}')
-                .setValue(mapping.template || '- {{text}} - {{note}}')
+                .setPlaceholder('- {{text}} - {{note}} - [📖]({{link}})')
+                .setValue(mapping.template || '- {{text}} - {{note}} - [📖]({{link}})')
                 .onChange(async (value) => {
                     this.plugin.settings.colorMappings[index].template = value;
                     await this.plugin.saveSettings();

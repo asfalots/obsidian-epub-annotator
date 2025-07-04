@@ -119,7 +119,7 @@ export class EpubHighlightManager {
             
             // Import annotationToMarkdown function
             const { annotationToMarkdown } = await import('./annotations');
-            const annotationLine = annotationToMarkdown(annotation, colorMapping?.template);
+            const annotationLine = annotationToMarkdown(annotation, colorMapping?.template, this.companionFile.path);
             
             let newContent: string;
             if (hasSection) {

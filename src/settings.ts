@@ -18,10 +18,10 @@ export const DEFAULT_SETTINGS: EpubReaderSettings = {
     progressPropertyName: 'epub-progress',
     annotationsPropertyName: 'epub-annotations',
     colorMappings: [
-        { color: '#ffeb3b', sectionTitle: '## Yellow Highlights', template: '- {{text}} - {{note}}' },
-        { color: '#4caf50', sectionTitle: '## Green Highlights', template: '- {{text}} - {{note}}' },
-        { color: '#2196f3', sectionTitle: '## Blue Highlights', template: '- {{text}} - {{note}}' },
-        { color: '#ff9800', sectionTitle: '## Orange Highlights', template: '- {{text}} - {{note}}' },
-        { color: '#e91e63', sectionTitle: '## Pink Highlights', template: '- {{text}} - {{note}}' }
+        { color: '#ffeb3b', sectionTitle: '## Yellow Highlights', template: '- {{text}} - {{note}} - [📖]({{link}})' },
+        { color: '#4caf50', sectionTitle: '## Green Highlights', template: '- {{text}} - {{note}} - [📖]({{link}})' },
+        { color: '#2196f3', sectionTitle: '## Blue Highlights', template: '- {{text}} - {{note}} - [📖]({{link}})' },
+        { color: '#ff9800', sectionTitle: '## Orange Highlights', template: '- {{text}} - {{note}} - [📖]({{link}})' },
+        { color: '#e91e63', sectionTitle: '## Pink Highlights', template: '- {{text}} - {{note}} - [📖]({{link}})' }
     ]
 };
