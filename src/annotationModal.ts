@@ -14,6 +14,7 @@ export class AnnotationNoteModal extends Modal {
     }
 
     onOpen() {
+        console.log('Opening Annotation Note Modal');
         const { contentEl } = this;
         contentEl.empty();
 
@@ -26,12 +27,15 @@ export class AnnotationNoteModal extends Modal {
         new Setting(contentEl)
             .setName('Note (optional)')
             .setDesc('Add a personal note to this highlight')
-            .addTextArea(text => text
-                .setPlaceholder('Enter your note here...')
-                .setValue(this.noteInput)
-                .onChange((value) => {
-                    this.noteInput = value;
-                }));
+            .addTextArea(text => {
+                text.setPlaceholder('Enter your note here...')
+                    .setValue(this.noteInput)
+                    .onChange((value) => {
+                        this.noteInput = value;
+                    });
+                
+                return text;
+            });
 
         const buttonContainer = contentEl.createDiv();
         buttonContainer.style.cssText = 'display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;';

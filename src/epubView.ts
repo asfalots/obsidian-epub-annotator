@@ -89,6 +89,7 @@ export class EpubView extends ItemView {
             // --- END NEW ---
 
             this.addNavigationButtons();
+            this.addColorPickerButton();
 
                 // --- Listen for page changes to save progress ---
             this.rendition.on('relocated', (location: any) => {
@@ -116,9 +117,6 @@ export class EpubView extends ItemView {
     addNavigationButtons() {
         this.addAction('chevron-left', 'Previous Page', () => this.rendition?.prev());
         this.addAction('chevron-right', 'Next Page', () => this.rendition?.next());
-        
-        // Add color picker for highlighting
-        this.addColorPickerButton();
     }
 
     addColorPickerButton() {
@@ -166,17 +164,18 @@ export class EpubView extends ItemView {
     }
 
     setupKeyboardNavigation(container: HTMLElement) {
-        // Make container focusable and focused
-        container.tabIndex = 0;
-        container.focus();
+        // Make container focusable for keyboard events only
+        container.tabIndex = -1;
         
         // Add keydown listener to container (not passive)
         container.addEventListener('keydown', this.handleKeyPress.bind(this), { passive: false });
         
-        // Ensure container keeps focus
-        container.addEventListener('blur', () => {
-            // Re-focus after a short delay to prevent losing focus
-            setTimeout(() => container.focus(), 10);
+        // Listen for keyboard events on the document when this view is active
+        this.registerDomEvent(document, 'keydown', (event: KeyboardEvent) => {
+            // Only handle if this view is active and no modal is open
+            if (this.app.workspace.activeLeaf?.view === this && !document.querySelector('.modal')) {
+                this.handleKeyPress(event);
+            }
         });
     }
 
