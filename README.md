@@ -1,124 +1,110 @@
-# EPUB Annotator Plugin for Obsidian
+# EPUB Annotator for Obsidian
 
-A powerful Obsidian plugin for reading EPUB files with advanced annotation and note-taking capabilities. Seamlessly integrates with your vault's markdown notes.
+Read and annotate EPUB books directly in Obsidian. Your highlights and notes are saved as human-readable markdown in your vault.
 
-## Features
+![EPUB Annotator Screenshot](screenshot-placeholder.png)
+*EPUB reader with color-coded highlighting and annotation features*
 
-### 📖 EPUB Reading
-- Full EPUB viewer with navigation controls
-- Reading progress saving
-- Keyboard navigation (arrow keys)
-- Responsive design
+## Quick Start
 
-### 🎨 Multi-Color Highlighting
-- 5 default highlight colors (customizable)
-- Color-coded sections in notes
-- Visual color picker in reader
-- Organized highlight sections
+1. **Install**: Add the plugin to your `.obsidian/plugins/` folder and enable it
+2. **Link an EPUB**: Add `epub-file: "path/to/book.epub"` to any note's frontmatter
+3. **Open**: Right-click the note and select "Open associated EPUB"
+4. **Highlight**: Select text, pick a color, add notes - everything saves automatically
 
-### 📝 Smart Annotations
-- Add personal notes to highlights
-- Human-readable markdown format
-- Automatic section organization
-- Hidden metadata for synchronization
+## Key Features
 
-### ⚙️ Configurable Settings
-- Custom property names for EPUB linking
-- Color-to-section mapping
-- Progress tracking configuration
-- Annotation organization options
+- **Built-in EPUB Reader** - No need for external apps
+- **5 Color Highlighting** - Organize highlights by importance or category  
+- **Clickable Links** - Jump back to exact locations in the book
+- **Auto-Organization** - Highlights sorted by color into markdown sections
+- **Progress Tracking** - Remembers where you left off
+- **Keyboard Navigation** - Use arrow keys to turn pages
 
-## Setup
+## How It Works
 
-1. Install the plugin in your `.obsidian/plugins/` folder
-2. Enable the plugin in Obsidian settings
-3. Configure your EPUB link property name (default: `epub-file`)
+### 1. Link Your EPUB
 
-## Usage
-
-### Linking EPUB to Notes
-
-Add the EPUB file path to your note's frontmatter:
+Add any EPUB file to your note using frontmatter:
 
 ```yaml
 ---
-epub-file: "path/to/your/book.epub"
-# or use wikilinks
+epub-file: "Books/My Book.epub"
+# or use wikilinks:
 epub-file: "[[My Book.epub]]"
 ---
 ```
 
-### Opening EPUB Reader
+### 2. Start Reading
 
-1. **Command Palette**: Use "Open associated EPUB"
-2. **Right-click**: On markdown files with EPUB links
-3. **Automatic**: The plugin detects EPUB-linked notes
+- **Command Palette**: Search for "Open associated EPUB"
+- **Right-click menu**: Available on notes with EPUB links
+- **Arrow keys**: Navigate between pages
+- **Automatic bookmarking**: Picks up where you left off
 
-### Creating Highlights
+### 3. Create Highlights
 
-1. Select text in the EPUB reader
-2. Choose a highlight color from the color picker
+1. Select any text in the reader
+2. Choose a highlight color from the picker
 3. Add an optional personal note
-4. The highlight is automatically saved to your note
+4. Your annotation automatically appears in the note
 
-### Organizing Annotations
+### 4. Organized Output
 
-- Highlights are automatically organized by color into sections
-- Use the "Reorganize EPUB annotations by color" command to clean up existing notes
-- Each section title is customizable in settings
-
-## Configuration
-
-Access plugin settings via Settings → Community Plugins → EPUB Annotator
-
-### Color Mappings
-
-Configure which colors correspond to which sections:
-
-- **Yellow** → `## Yellow Highlights`
-- **Green** → `## Green Highlights`  
-- **Blue** → `## Blue Highlights`
-- **Orange** → `## Orange Highlights`
-- **Pink** → `## Pink Highlights`
-
-Add, remove, or modify color mappings as needed.
-
-### Property Names
-
-Customize the frontmatter property names:
-
-- **EPUB Link Property**: Property for linking EPUB files
-- **Progress Property**: Property for saving reading position
-- **Annotations Property**: Property for annotation metadata
-
-## Note Format
-
-Annotations are stored in human-readable markdown format:
+Highlights are automatically sorted by color into clean markdown sections:
 
 ```markdown
 ## Yellow Highlights
 
-- "This is an important quote from the book" - My personal note about this passage
-<!-- EPUB_ANNOTATION: {"id":"1640995200000","cfi":"epubcfi(/6/14[id4]!/4/2/2/2[id4]/2/1:0)","text":"This is an important quote from the book","color":"#ffeb3b","note":"My personal note about this passage","timestamp":1640995200000} -->
+- "Important quote from the book" - My thoughts here [📖](obsidian://epub-annotator?file=...)
 
-## Green Highlights
+## Blue Highlights  
 
-- "Another significant passage"
-<!-- EPUB_ANNOTATION: {"id":"1640995300000","cfi":"epubcfi(/6/16[id5]!/4/2/2/4[id5]/2/1:0)","text":"Another significant passage","color":"#4caf50","timestamp":1640995300000} -->
+- "Technical concept to remember" [📖](obsidian://epub-annotator?file=...)
 ```
 
-The hidden comments contain metadata for synchronization and are automatically managed.
+The 📖 links take you back to the exact location in the book.
+
+## Customization
+
+### Color Mappings
+
+Go to Settings → Community Plugins → EPUB Annotator to customize:
+
+- **Colors**: Change highlight colors
+- **Section Titles**: Customize section headings (e.g., "Important Quotes", "Key Concepts")
+- **Templates**: Control how highlights appear in your notes
+
+### Template Variables
+
+Use these in your templates:
+- `{{text}}` - The highlighted text
+- `{{note}}` - Your personal note  
+- `{{link}}` - Clickable link back to the book location
+
+### Examples
+
+```markdown
+- {{text}} - {{note}} [📖]({{link}})
+> {{text}}
+> 
+> Note: {{note}} [🔗]({{link}})
+**{{text}}** ({{note}}) [📖]({{link}})
+```
 
 ## Commands
 
-- **Open associated EPUB**: Opens the EPUB reader for the current note
-- **Reorganize EPUB annotations by color**: Reorganizes existing annotations into color-coded sections
+- **Open associated EPUB** - Opens the reader for the current note
+- **Reorganize EPUB annotations by color** - Cleans up existing highlights
+
+## Requirements
+
+- Obsidian 0.15.0+
+- EPUB files in your vault or accessible file paths
 
 ## Development
 
-Built with TypeScript using:
-- [epub.js](http://epubjs.org/) for EPUB rendering
-- [Obsidian API](https://docs.obsidian.md/Reference/TypeScript+API/Reference) for vault integration
+Built with TypeScript using [epub.js](http://epubjs.org/) and the [Obsidian API](https://docs.obsidian.md/Reference/TypeScript+API/Reference).
 
 ## License
 
