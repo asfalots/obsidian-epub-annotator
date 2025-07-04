@@ -31,6 +31,7 @@ export class EpubReaderSettingsTab extends PluginSettingTab {
                     // Save the settings
                     await this.plugin.saveSettings();
                 }));
+        
         new Setting(containerEl)
             .setName('Progress Property')
             .setDesc('The frontmatter property name for storing reading progress (CFI).')
@@ -41,5 +42,64 @@ export class EpubReaderSettingsTab extends PluginSettingTab {
                         this.plugin.settings.progressPropertyName = value;
                         await this.plugin.saveSettings();
                     }));
+
+        new Setting(containerEl)
+            .setName('Annotations Property')
+            .setDesc('The frontmatter property name for storing annotation metadata.')
+            .addText(text => text
+                .setPlaceholder('e.g., epub-annotations')
+                .setValue(this.plugin.settings.annotationsPropertyName)
+                .onChange(async (value) => {
+                        this.plugin.settings.annotationsPropertyName = value;
+                        await this.plugin.saveSettings();
+                    }));
+
+        containerEl.createEl('h3', { text: 'Highlight Color Mappings' });
+        containerEl.createEl('p', { 
+            text: 'Configure which colors map to which sections in your notes.' 
+        });
+
+        this.plugin.settings.colorMappings.forEach((mapping, index) => {
+            this.createColorMappingSetting(containerEl, mapping, index);
+        });
+
+        new Setting(containerEl)
+            .addButton(button => button
+                .setButtonText('Add Color Mapping')
+                .setCta()
+                .onClick(() => {
+                    this.plugin.settings.colorMappings.push({
+                        color: '#ffffff',
+                        sectionTitle: '## New Section'
+                    });
+                    this.plugin.saveSettings();
+                    this.display(); // Refresh the display
+                }));
+    }
+
+    createColorMappingSetting(containerEl: HTMLElement, mapping: any, index: number) {
+        const setting = new Setting(containerEl)
+            .setName(`Color ${index + 1}`)
+            .addColorPicker(color => color
+                .setValue(mapping.color)
+                .onChange(async (value) => {
+                    this.plugin.settings.colorMappings[index].color = value;
+                    await this.plugin.saveSettings();
+                }))
+            .addText(text => text
+                .setPlaceholder('## Section Title')
+                .setValue(mapping.sectionTitle)
+                .onChange(async (value) => {
+                    this.plugin.settings.colorMappings[index].sectionTitle = value;
+                    await this.plugin.saveSettings();
+                }))
+            .addButton(button => button
+                .setIcon('trash')
+                .setTooltip('Remove this color mapping')
+                .onClick(async () => {
+                    this.plugin.settings.colorMappings.splice(index, 1);
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh the display
+                }));
     }
 }

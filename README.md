@@ -1,94 +1,125 @@
-# Obsidian Sample Plugin
+# EPUB Annotator Plugin for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+A powerful Obsidian plugin for reading EPUB files with advanced annotation and note-taking capabilities. Seamlessly integrates with your vault's markdown notes.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Features
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+### 📖 EPUB Reading
+- Full EPUB viewer with navigation controls
+- Reading progress saving
+- Keyboard navigation (arrow keys)
+- Responsive design
 
-## First time developing plugins?
+### 🎨 Multi-Color Highlighting
+- 5 default highlight colors (customizable)
+- Color-coded sections in notes
+- Visual color picker in reader
+- Organized highlight sections
 
-Quick starting guide for new plugin devs:
+### 📝 Smart Annotations
+- Add personal notes to highlights
+- Human-readable markdown format
+- Automatic section organization
+- Hidden metadata for synchronization
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+### ⚙️ Configurable Settings
+- Custom property names for EPUB linking
+- Color-to-section mapping
+- Progress tracking configuration
+- Annotation organization options
 
-## Releasing new releases
+## Setup
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+1. Install the plugin in your `.obsidian/plugins/` folder
+2. Enable the plugin in Obsidian settings
+3. Configure your EPUB link property name (default: `epub-file`)
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## Usage
 
-## Adding your plugin to the community plugin list
+### Linking EPUB to Notes
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+Add the EPUB file path to your note's frontmatter:
 
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```yaml
+---
+epub-file: "path/to/your/book.epub"
+# or use wikilinks
+epub-file: "[[My Book.epub]]"
+---
 ```
 
-If you have multiple URLs, you can also do:
+### Opening EPUB Reader
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+1. **Command Palette**: Use "Open associated EPUB"
+2. **Right-click**: On markdown files with EPUB links
+3. **Automatic**: The plugin detects EPUB-linked notes
+
+### Creating Highlights
+
+1. Select text in the EPUB reader
+2. Choose a highlight color from the color picker
+3. Add an optional personal note
+4. The highlight is automatically saved to your note
+
+### Organizing Annotations
+
+- Highlights are automatically organized by color into sections
+- Use the "Reorganize EPUB annotations by color" command to clean up existing notes
+- Each section title is customizable in settings
+
+## Configuration
+
+Access plugin settings via Settings → Community Plugins → EPUB Annotator
+
+### Color Mappings
+
+Configure which colors correspond to which sections:
+
+- **Yellow** → `## Yellow Highlights`
+- **Green** → `## Green Highlights`  
+- **Blue** → `## Blue Highlights`
+- **Orange** → `## Orange Highlights`
+- **Pink** → `## Pink Highlights`
+
+Add, remove, or modify color mappings as needed.
+
+### Property Names
+
+Customize the frontmatter property names:
+
+- **EPUB Link Property**: Property for linking EPUB files
+- **Progress Property**: Property for saving reading position
+- **Annotations Property**: Property for annotation metadata
+
+## Note Format
+
+Annotations are stored in human-readable markdown format:
+
+```markdown
+## Yellow Highlights
+
+- "This is an important quote from the book" - My personal note about this passage
+<!-- EPUB_ANNOTATION: {"id":"1640995200000","cfi":"epubcfi(/6/14[id4]!/4/2/2/2[id4]/2/1:0)","text":"This is an important quote from the book","color":"#ffeb3b","note":"My personal note about this passage","timestamp":1640995200000} -->
+
+## Green Highlights
+
+- "Another significant passage"
+<!-- EPUB_ANNOTATION: {"id":"1640995300000","cfi":"epubcfi(/6/16[id5]!/4/2/2/4[id5]/2/1:0)","text":"Another significant passage","color":"#4caf50","timestamp":1640995300000} -->
 ```
 
-## API Documentation
+The hidden comments contain metadata for synchronization and are automatically managed.
 
-See https://github.com/obsidianmd/obsidian-api
+## Commands
+
+- **Open associated EPUB**: Opens the EPUB reader for the current note
+- **Reorganize EPUB annotations by color**: Reorganizes existing annotations into color-coded sections
+
+## Development
+
+Built with TypeScript using:
+- [epub.js](http://epubjs.org/) for EPUB rendering
+- [Obsidian API](https://docs.obsidian.md/Reference/TypeScript+API/Reference) for vault integration
+
+## License
+
+MIT License

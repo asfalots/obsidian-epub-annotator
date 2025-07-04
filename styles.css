@@ -1,0 +1,64 @@
+/* EPUB Annotator Styles */
+
+.epub-color-picker {
+    position: absolute;
+    top: 10px;
+    right: 60px;
+    z-index: 1000;
+    display: flex;
+    gap: 5px;
+    padding: 5px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 5px;
+    box-shadow: var(--shadow-s);
+}
+
+.epub-color-picker button {
+    width: 24px;
+    height: 24px;
+    border: 2px solid transparent;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.epub-color-picker button:hover {
+    opacity: 0.8;
+}
+
+.epub-color-picker button.selected {
+    border-color: var(--text-normal) !important;
+}
+
+/* Annotation modal styles */
+.modal .setting-item-description {
+    margin-bottom: 10px;
+}
+
+/* Color mapping settings */
+.color-mapping-setting {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.color-mapping-setting input[type="color"] {
+    width: 40px;
+    height: 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* EPUB annotation highlights */
+.epub-highlight {
+    background-color: var(--highlight-color, #ffeb3b);
+    opacity: 0.3;
+    mix-blend-mode: multiply;
+    cursor: pointer;
+}
+
+.epub-highlight:hover {
+    opacity: 0.5;
+}
