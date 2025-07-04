@@ -36,17 +36,38 @@ export function parseAnnotationsFromMarkdown(content: string): EpubAnnotation[] 
 }
 
 /**
- * Convert annotation to markdown format with hidden metadata
+ * Convert annotation to markdown format with template and hidden metadata
  */
-export function annotationToMarkdown(annotation: EpubAnnotation): string {
+export function annotationToMarkdown(annotation: EpubAnnotation, template?: string): string {
+    if (template) {
+        const renderedContent = renderTemplate(template, annotation);
+        return `${renderedContent}\n<!-- EPUB_ANNOTATION: ${JSON.stringify(annotation)} -->\n`;
+    }
+    
+    // Fallback to default format
     const noteText = annotation.note ? ` - ${annotation.note}` : '';
     return `- ${annotation.text}${noteText}\n<!-- EPUB_ANNOTATION: ${JSON.stringify(annotation)} -->\n`;
 }
 
 /**
- * Generate section content for a specific color
+ * Generate section content for a specific color with template
  */
-export function generateSectionContent(annotations: EpubAnnotation[], color: string): string {
+export function generateSectionContent(annotations: EpubAnnotation[], color: string, template?: string): string {
     const colorAnnotations = annotations.filter(a => a.color === color);
-    return colorAnnotations.map(a => annotationToMarkdown(a)).join('\n');
+    return colorAnnotations.map(a => annotationToMarkdown(a, template)).join('\n');
+}
+
+/**
+ * Render template with annotation data
+ */
+export function renderTemplate(template: string, annotation: EpubAnnotation): string {
+    let rendered = template;
+    
+    // Replace {{text}} with annotation text
+    rendered = rendered.replace(/\{\{text\}\}/g, annotation.text);
+    
+    // Replace {{note}} with annotation note
+    rendered = rendered.replace(/\{\{note\}\}/g, annotation.note || '');
+    
+    return rendered;
 }

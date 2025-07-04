@@ -58,6 +58,15 @@ export class EpubReaderSettingsTab extends PluginSettingTab {
         containerEl.createEl('p', { 
             text: 'Configure which colors map to which sections in your notes.' 
         });
+        containerEl.createEl('p', { 
+            text: 'Template variables: {{text}} (highlighted text), {{note}} (user note)' 
+        });
+        const exampleEl = containerEl.createEl('details');
+        exampleEl.createEl('summary', { text: 'Template Examples' });
+        const exampleList = exampleEl.createEl('ul');
+        exampleList.createEl('li').innerHTML = '<code>- {{text}} - {{note}}</code> → Standard bullet list';
+        exampleList.createEl('li').innerHTML = '<code>> {{text}}<br/>><br/>> Note: {{note}}</code> → Block quote format';
+        exampleList.createEl('li').innerHTML = '<code>**{{text}}** ({{note}})</code> → Bold text with note in parentheses';
 
         this.plugin.settings.colorMappings.forEach((mapping, index) => {
             this.createColorMappingSetting(containerEl, mapping, index);
@@ -70,7 +79,8 @@ export class EpubReaderSettingsTab extends PluginSettingTab {
                 .onClick(() => {
                     this.plugin.settings.colorMappings.push({
                         color: '#ffffff',
-                        sectionTitle: '## New Section'
+                        sectionTitle: '## New Section',
+                        template: '- {{text}} - {{note}}'
                     });
                     this.plugin.saveSettings();
                     this.display(); // Refresh the display
@@ -100,6 +110,18 @@ export class EpubReaderSettingsTab extends PluginSettingTab {
                     this.plugin.settings.colorMappings.splice(index, 1);
                     await this.plugin.saveSettings();
                     this.display(); // Refresh the display
+                }));
+
+        // Add template setting as a separate setting below
+        new Setting(containerEl)
+            .setName('Template')
+            .setDesc('Template for this highlight color. Use {{text}} for highlighted text and {{note}} for user notes.')
+            .addTextArea(textArea => textArea
+                .setPlaceholder('- {{text}} - {{note}}')
+                .setValue(mapping.template || '- {{text}} - {{note}}')
+                .onChange(async (value) => {
+                    this.plugin.settings.colorMappings[index].template = value;
+                    await this.plugin.saveSettings();
                 }));
     }
 }

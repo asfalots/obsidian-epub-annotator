@@ -117,8 +117,9 @@ export class EpubHighlightManager {
             const sectionRegex = new RegExp(`^${sectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'm');
             const hasSection = sectionRegex.test(content);
             
-            const noteText = annotation.note ? ` - ${annotation.note}` : '';
-            const annotationLine = `- ${annotation.text}${noteText}\n<!-- EPUB_ANNOTATION: ${JSON.stringify(annotation)} -->\n`;
+            // Import annotationToMarkdown function
+            const { annotationToMarkdown } = await import('./annotations');
+            const annotationLine = annotationToMarkdown(annotation, colorMapping?.template);
             
             let newContent: string;
             if (hasSection) {

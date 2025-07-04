@@ -185,7 +185,7 @@ export default class EpubReaderPlugin extends Plugin {
             let newContent = cleanContent.trim();
             
             this.settings.colorMappings.forEach(mapping => {
-                const sectionContent = generateSectionContent(annotations, mapping.color);
+                const sectionContent = generateSectionContent(annotations, mapping.color, mapping.template);
                 if (sectionContent.trim()) {
                     newContent += `\n\n${mapping.sectionTitle}\n\n${sectionContent}`;
                 }
