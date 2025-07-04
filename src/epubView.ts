@@ -17,6 +17,10 @@ export class EpubView extends ItemView {
     epubFile: TFile | null = null;
     currentAnnotations: EpubAnnotation[] = [];
     selectedColor: string;
+    currentCfi: string | null = null;
+    isRestoringPosition: boolean = false;
+    isResizing: boolean = false;
+    resizeTimeout: NodeJS.Timeout | null = null;
 
     constructor(leaf: WorkspaceLeaf, plugin: MyEpubPlugin) {
         super(leaf);
@@ -71,8 +75,7 @@ export class EpubView extends ItemView {
                 height: "100%"
             });
             
-            await this.rendition.display();
-
+            
             const progressCache = this.app.metadataCache.getFileCache(this.companionFile);
             const savedCfi = progressCache?.frontmatter?.[this.plugin.settings.progressPropertyName];
 
@@ -81,10 +84,13 @@ export class EpubView extends ItemView {
                 try {
                     // Tell the rendition to go to the saved CFI
                     await this.rendition.display(savedCfi);
+                    this.currentCfi = savedCfi;
                 } catch (error) {
                     console.error("Failed to display saved CFI:", savedCfi, error);
                     new Notice("Could not restore last reading position.");
                 }
+            }else{
+                await this.rendition.display();
             }
             // --- END NEW ---
 
@@ -93,12 +99,54 @@ export class EpubView extends ItemView {
 
                 // --- Listen for page changes to save progress ---
             this.rendition.on('relocated', (location: any) => {
+                console.debug("Page relocated to:", location.start.cfi);
                 const cfi = location.start.cfi;
-                if (this.companionFile) {
-                    // Call the save function from our main plugin class
-                    this.plugin.saveReadingProgress(this.companionFile, cfi);
+                
+                // Don't save if we're in the middle of restoring position or resizing
+                if (!this.isRestoringPosition && !this.isResizing) {
+                    this.currentCfi = cfi;
+                    // Only save progress if this view is active and visible
+                    if (this.companionFile && 
+                        this.app.workspace.activeLeaf?.view === this && 
+                        this.containerEl.isConnected && 
+                        !this.containerEl.hidden) {
+                        this.plugin.saveReadingProgress(this.companionFile, cfi);
+                    }
                 }
             });
+
+            // Listen for resize events to restore position
+            this.rendition.on('resized', () => {
+                console.debug("Rendition resized, restoring position to:", this.currentCfi);
+                this.handleResize();
+            });
+
+            // Use ResizeObserver to detect container size changes
+            const resizeObserver = new ResizeObserver((entries) => {
+                for (const entry of entries) {
+                    console.debug("Container resized, restoring position");
+                    this.handleResize();
+                }
+            });
+            resizeObserver.observe(epubContainer);
+
+            // Listen for window resize events
+            const handleWindowResize = () => {
+                console.debug("Window resized, restoring position");
+                this.handleResize();
+            };
+            this.registerDomEvent(window, 'resize', handleWindowResize);
+
+            // Use intersection observer to detect when view becomes visible
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && this.currentCfi) {
+                        console.debug("View became visible, restoring position");
+                        this.restorePosition();
+                    }
+                });
+            });
+            observer.observe(epubContainer);
 
             // Add keyboard navigation with proper event handling
             this.setupKeyboardNavigation(epubContainer);
@@ -219,6 +267,9 @@ export class EpubView extends ItemView {
     }
 
     async onClose() {
+        if (this.resizeTimeout) {
+            clearTimeout(this.resizeTimeout);
+        }
         if (this.book) {
             this.book.destroy();
         }
@@ -357,6 +408,42 @@ export class EpubView extends ItemView {
             console.error("Failed to save annotation:", error);
             new Notice('Failed to save annotation to note');
         }
+    }
+
+    handleResize() {
+        if (!this.currentCfi) return;
+        
+        // Set resize flag to prevent saving progress during resize
+        this.isResizing = true;
+        
+        // Clear any existing timeout
+        if (this.resizeTimeout) {
+            clearTimeout(this.resizeTimeout);
+        }
+        
+        // Set timeout to clear resize flag and restore position
+        this.resizeTimeout = setTimeout(() => {
+            this.isResizing = false;
+            this.restorePosition();
+        }, 200);
+    }
+
+    restorePosition() {
+        if (!this.currentCfi || this.isRestoringPosition) return;
+        
+        this.isRestoringPosition = true;
+        console.debug("Restoring position to:", this.currentCfi);
+        
+        // Small delay to ensure any resize/redraw is complete
+        setTimeout(() => {
+            this.rendition.display(this.currentCfi).then(() => {
+                console.debug("Position restored successfully");
+                this.isRestoringPosition = false;
+            }).catch((error: any) => {
+                console.error("Failed to restore position:", error);
+                this.isRestoringPosition = false;
+            });
+        }, 150);
     }
 
 }
